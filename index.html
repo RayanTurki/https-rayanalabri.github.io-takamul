@@ -552,6 +552,20 @@ html[dir="ltr"] .summary-box {
   width: 100%;
   border: 1px solid var(--line);
 }
+
+.page-hidden{display:none !important}
+.topbar{position:static}
+.wrap{max-width:880px}
+.grid{display:block !important}
+.stack{display:contents !important}
+.card{margin-bottom:18px}
+.tabs{position:sticky;top:0;z-index:40;background:var(--bg);border-bottom:1px solid var(--line);padding:8px 12px;display:flex;gap:8px;overflow-x:auto;justify-content:safe center}
+.tab{display:inline-flex;align-items:center;gap:8px;flex:none;border:1px solid var(--line);background:var(--surface);color:var(--head);border-radius:999px;padding:8px 16px;font:inherit;font-weight:700;cursor:pointer}
+.tab-n{min-width:24px;height:24px;padding:0 5px;border-radius:12px;display:grid;place-items:center;font-size:12px;background:var(--sage-t);color:var(--sage-dark)}
+.tab.active{background:var(--clay);border-color:var(--clay);color:#fff}
+.tab.active .tab-n{background:rgba(255,255,255,.25);color:#fff}
+@media (max-width:560px){.tabs{gap:6px;padding:8px 8px}.tab{padding:8px 11px;font-size:14px;gap:6px}.tab-n:not(#tab-week-n){display:none}}
+.tab:focus-visible{outline:2px solid var(--mauve);outline-offset:2px}
 </style>
 </head>
 <body>
@@ -568,16 +582,21 @@ html[dir="ltr"] .summary-box {
       </div>
     </div>
     <div class="top-controls">
-      <span class="ai-status" id="ai-status-pill"><span class="ai-dot"></span><span id="ai-status-text">Gemini AI متصل</span></span>
-      <button class="ghost mini" id="btn-test-ai" type="button">⚡ فحص AI</button>
-      <button class="ghost mini" id="btn-key" type="button">⚙️ API Key</button>
+      <span class="ai-status" id="ai-status-pill"><span class="ai-dot"></span><span id="ai-status-text">الذكاء الاصطناعي جاهز</span></span>
       <button class="sagebtn mini" id="btn-lang" type="button">English</button>
     </div>
   </div>
 </header>
+<nav class="tabs" id="tabs" aria-label="Pages">
+  <button class="tab" data-go="profile" type="button"><span class="tab-n">1</span><span id="tab-profile-t">بياناتي</span></button>
+  <button class="tab" data-go="plan" type="button"><span class="tab-n">2</span><span id="tab-plan-t">خطتي</span></button>
+  <button class="tab" data-go="week" type="button"><span class="tab-n" id="tab-week-n">0</span><span id="tab-week-t">جدولي</span></button>
+  <button class="tab" data-go="coach" type="button"><span class="tab-n">AI</span><span id="tab-coach-t">المدرب</span></button>
+  <button class="tab" data-go="refs" type="button"><span class="tab-n">📚</span><span id="tab-refs-t">المراجع</span></button>
+</nav>
 
 <main class="wrap">
-  <div class="hero">
+  <div class="hero" data-page="profile">
     <div class="hero-content">
       <h1 id="t-hero-h">أسبوعك الصحي وجدولك اليومي، مخصص حسب موقعك في الشرقية والرياض</h1>
       <p id="t-hero-p">اختر مدينتك (الشرقية أو الرياض) والحي القريب منك ليقترح لك وكيل الذكاء الاصطناعي الحصص الرياضية والأندية القريبة في قسم مستقل، ويبني لك خطة التغذية والاستشفاء في قسم منفصل مبني على المراجع العلمية.</p>
@@ -588,7 +607,7 @@ html[dir="ltr"] .summary-box {
   </div>
 
   <!-- Subscription Tiers -->
-  <div class="tier-bar" role="radiogroup" aria-label="Subscription Tiers">
+  <div class="tier-bar" data-page="profile" role="radiogroup" aria-label="Subscription Tiers">
     <div class="tier-card" data-tier="Free">
       <div class="tier-head"><span id="tier-free-n">الباقة الأساسية (Free)</span><span class="tier-price" id="tier-free-p">0 ر.س / شهر</span></div>
       <div class="tier-desc" id="tier-free-d">تتبع أساسي للروتين اليومي وإدخال يدوي للمؤشرات الحيوية.</div>
@@ -606,7 +625,7 @@ html[dir="ltr"] .summary-box {
   <div class="grid">
     <!-- Left Column: Biometrics, Location in Eastern Province & Riyadh + Trusted Knowledge Base -->
     <div class="stack">
-      <section class="card">
+      <section class="card" data-page="profile">
         <h2><span id="t-s1">1. بياناتك وموقعك (الشرقية / الرياض)</span><span class="badge" id="active-tier-badge">Plus · 39 SAR</span></h2>
         
         <div class="row">
@@ -682,7 +701,7 @@ html[dir="ltr"] .summary-box {
       </section>
 
       <!-- Trusted Medical & Scientific Knowledge Base -->
-      <section class="card">
+      <section class="card" data-page="refs">
         <h2>
           <span id="t-kb-title">📚 قاعدة البيانات الطبية والعلمية المعتمدة</span>
           <button class="bluebtn mini" id="btn-add-book" type="button">+ إضافة مرجع</button>
@@ -694,11 +713,12 @@ html[dir="ltr"] .summary-box {
 
     <!-- Right Column: Separate Sections for Classes/Venues, Nutrition/Recovery, Daily Timeline, Approved & Chat -->
     <div class="stack">
-      <div id="plan-error" class="err" hidden></div>
-      <div id="plan-summary"></div>
+      <div data-page="plan" class="actions" style="margin:0 0 14px"><button class="ghost" id="go-profile" data-go="profile" type="button">تعديل بياناتي</button></div>
+      <div data-page="plan" id="plan-error" class="err" hidden></div>
+      <div data-page="plan" id="plan-summary"></div>
 
       <!-- SECTION A: Fitness Classes & Local Venues (INDEPENDENT RESPONSE) -->
-      <section class="card">
+      <section class="card" data-page="plan">
         <h2>
           <span id="t-sec-classes">🏋️ 2. الحصص الرياضية وأماكنها القريبة منك</span>
           <button class="sagebtn mini" id="btn-only-classes" type="button">🔄 تحديث الحصص فقط</button>
@@ -708,7 +728,7 @@ html[dir="ltr"] .summary-box {
       </section>
 
       <!-- SECTION B: Nutrition & Recovery Plan (INDEPENDENT RESPONSE) -->
-      <section class="card">
+      <section class="card" data-page="plan">
         <h2>
           <span id="t-sec-nutrition">🥗 3. خطة التغذية والاستشفاء (مبنية على المراجع)</span>
           <button class="mauvebtn mini" id="btn-only-nutrition" type="button">🔄 تحديث التغذية فقط</button>
@@ -718,7 +738,7 @@ html[dir="ltr"] .summary-box {
       </section>
 
       <!-- SECTION C: Daily Hour-by-Hour Schedule -->
-      <section class="card">
+      <section class="card" data-page="plan">
         <h2>
           <span id="t-daily-title">🗓️ 4. ترتيب الجدول اليومي المقترح (ساعة بساعة)</span>
           <button class="ghost mini" id="btn-regen-day" type="button">🔄 إعادة ترتيب اليوم</button>
@@ -729,7 +749,7 @@ html[dir="ltr"] .summary-box {
       </section>
 
       <!-- SECTION D: Approved Schedule -->
-      <section class="card">
+      <section class="card" data-page="week">
         <h2>
           <span id="t-s3">5. الجدول الأسبوعي المعتمد (موافقتك)</span>
           <div>
@@ -741,8 +761,8 @@ html[dir="ltr"] .summary-box {
       </section>
 
       <!-- SECTION E: Live AI Coach -->
-      <section class="card">
-        <h2><span id="t-s4">6. اسأل مدرب تكامل الذكي (AI Coach)</span><span class="badge badge-blue">RAG Grounded</span></h2>
+      <section class="card" data-page="coach">
+        <h2><span id="t-s4">6. اسأل مدرب تكامل الذكي (AI Coach)</span><span class="badge badge-blue">مبني على المراجع</span></h2>
         <div class="chips" id="quick-chips">
           <button class="chip" type="button" data-q="وش أفضل أندية أو حصص جماعية قريبة من موقعي؟">أندية قريبة من موقعي؟</button>
           <button class="chip" type="button" data-q="وش يقول مرجع النوم (Why We Sleep) عن تحسين نومي؟">نصيحة من كتاب النوم؟</button>
@@ -765,22 +785,6 @@ html[dir="ltr"] .summary-box {
     <span>Eastern Province & Riyadh · Evidence-Based AI Wellness Agent</span>
   </footer>
 </main>
-
-<!-- API Key Modal -->
-<div class="modal-backdrop" id="key-modal">
-  <div class="modal">
-    <h2 style="margin-top:0">إعداد مفتاح Gemini API</h2>
-    <p class="note">المفتاح مدمج حالياً وجاهز للعمل. يمكنك تحديثه هنا في أي وقت:</p>
-    <div class="field">
-      <label for="api-key-input">Gemini API Key</label>
-      <input id="api-key-input" type="text" placeholder="AQ... or AIzaSy...">
-    </div>
-    <div class="actions">
-      <button class="sagebtn mini" id="save-key" type="button">حفظ المفتاح</button>
-      <button class="ghost mini" id="close-key" type="button">إغلاق</button>
-    </div>
-  </div>
-</div>
 
 <!-- Add Trusted Book Modal -->
 <div class="modal-backdrop" id="book-modal">
@@ -806,7 +810,8 @@ html[dir="ltr"] .summary-box {
 </div>
 
 <script>
-const DEFAULT_KEY = "AQ.Ab8RN6KsCdeMOP4YtKtTANwmE4ZmwTIm0Y7_PX7H7EAmmmCBzA";
+// Experimental build: the key is stored in the page. Replace it here if you ever change keys.
+const API_KEY = "AQ.Ab8RN6LY7uLwdSocCqU_Axr_oHBDyCBb984Y38jvZQI6jp3ASA";
 const MODELS = ["gemini-3.8-flash", "gemini-3-flash-preview", "gemini-2.5-flash", "gemini-2.0-flash"];
 
 let lang = "ar";
@@ -880,16 +885,12 @@ function saveBooks(books) {
 
 const $ = (id) => document.getElementById(id);
 
-function getApiKey() {
-  return localStorage.getItem("takamul_gemini_key") || DEFAULT_KEY;
-}
-
 function setAiStatus(ok, label) {
   const pill = $("ai-status-pill");
   const txt = $("ai-status-text");
   if (ok) {
     pill.classList.remove("err-state");
-    txt.textContent = label || (lang === "ar" ? "Gemini AI جاهز" : "Gemini AI Ready");
+    txt.textContent = label || (lang === "ar" ? "الذكاء الاصطناعي جاهز" : "AI ready");
   } else {
     pill.classList.add("err-state");
     txt.textContent = label || (lang === "ar" ? "تنبيه اتصال AI" : "AI Connection Issue");
@@ -919,7 +920,7 @@ const i18n = {
     sub: "نموذج أولي تفاعلي مدعوم بالذكاء الاصطناعي وقاعدة مراجع علمية · BUS 200",
     heroH: "أسبوعك الصحي وجدولك اليومي، مخصص حسب موقعك في الشرقية والرياض",
     heroP: "اختر مدينتك (الشرقية أو الرياض) والحي القريب منك ليقترح لك وكيل الذكاء الاصطناعي الحصص الرياضية والأندية القريبة في قسم مستقل، ويبني لك خطة التغذية والاستشفاء في قسم منفصل مبني على المراجع العلمية.",
-    s1: "1. بياناتك وموقعك (الشرقية / الرياض)",
+    s1: "بياناتك وموقعك (الشرقية / الرياض)",
     lCity: "🏙️ المدينة / المنطقة",
     lZone: "📍 النطاق / المحافظة",
     lNeigh: "الحي بالتحديد (اختياري)",
@@ -934,24 +935,24 @@ const i18n = {
     btnGen: "✨ توليد الحصص والتغذية والجدول اليومي",
     btnGenLoad: "جاري التحليل وبناء الأقسام...",
     btnDemo: "تعبئة بيانات تجريبية",
-    disclaimer: "تنويه: يستند المساعد إلى مراجع علمية معتمدة لأغراض التثقيف ونمط الحياة الصحي فقط، ولا تُنفذ أي حجوزات إلا بعد موافقتك.",
+    disclaimer: "تنويه: يستند المساعد إلى مراجع علمية معتمدة لأغراض التثقيف ونمط الحياة الصحي فقط، ولا تُنفذ أي حجوزات إلا بعد موافقتك. هذه ليست نصيحة طبية؛ استشر طبيبك عند الحاجة، وتحقق من أسماء الأماكن ومواعيدها قبل الذهاب.",
     kbTitle: "📚 قاعدة البيانات الطبية والعلمية المعتمدة",
     kbSub: "يعتمد وكيل الذكاء الاصطناعي حصرياً على هذه الكتب والأدلة المفعّلة عند بناء توصياتك:",
     addBook: "+ إضافة مرجع",
-    secClasses: "🏋️ 2. الحصص الرياضية وأماكنها القريبة منك",
+    secClasses: "🏋️ الحصص الرياضية وأماكنها القريبة منك",
     btnOnlyClasses: "🔄 تحديث الحصص فقط",
     classesSub: "مقترحات حصص وأندية ومراكز تدريب ومضامير مشي في نطاقك المختار (الشرقية أو الرياض):",
     emptyClasses: "اضغط على زر التوليد لعرض الحصص الرياضية وأماكنها المقترحة في منطقتك.",
-    secNutrition: "🥗 3. خطة التغذية والاستشفاء (مبنية على المراجع)",
+    secNutrition: "🥗 خطة التغذية والاستشفاء (مبنية على المراجع)",
     btnOnlyNutrition: "🔄 تحديث التغذية فقط",
     emptyNutrition: "ستظهر هنا توصيات الوجبات والماكروز والاستشفاء بشكل مستقل تماماً عن الحصص الرياضية.",
-    dailyTitle: "🗓️ 4. ترتيب الجدول اليومي المقترح (ساعة بساعة)",
+    dailyTitle: "🗓️ ترتيب الجدول اليومي المقترح (ساعة بساعة)",
     regenDay: "🔄 إعادة ترتيب اليوم",
     emptyDay: "سيظهر هنا جدولك اليومي المرتب بالساعة حول دوامك وتنقلاتك في مدينتك.",
-    s3: "5. الجدول الأسبوعي المعتمد (موافقتك)",
+    s3: "الجدول الأسبوعي المعتمد (موافقتك)",
     approveAll: "اعتماد الكل",
     emptyWeek: 'لم يتم اعتماد أي حصة أو وجبة بعد. اضغط "اعتماد" لإضافتها هنا.',
-    s4: "6. اسأل مدرب تكامل الذكي (AI Coach)",
+    s4: "اسأل مدرب تكامل الذكي (AI Coach)",
     approve: "اعتماد",
     skip: "تخطي",
     remove: "حذف",
@@ -968,7 +969,7 @@ const i18n = {
     sub: "AI-Powered Prototype Grounded in Trusted Medical References · BUS 200",
     heroH: "Your daily schedule & wellness, tailored to Eastern Province & Riyadh",
     heroP: "Select your city (Eastern Province or Riyadh) and district to get nearby fitness classes & venues in one dedicated section, and an independent evidence-based nutrition & recovery plan in another.",
-    s1: "1. Your Metrics & Location (Eastern Province / Riyadh)",
+    s1: "Your Metrics & Location (Eastern Province / Riyadh)",
     lCity: "🏙️ City / Region",
     lZone: "📍 District / Governorate",
     lNeigh: "Specific Neighborhood (Optional)",
@@ -983,24 +984,24 @@ const i18n = {
     btnGen: "✨ Generate Classes, Nutrition & Daily Schedule",
     btnGenLoad: "Generating Independent Plans...",
     btnDemo: "Fill Sample Data",
-    disclaimer: "Disclaimer: Recommendations are grounded in trusted scientific references for general wellness education only. No bookings occur without your approval.",
+    disclaimer: "Disclaimer: Recommendations are grounded in trusted scientific references for general wellness education only. No bookings occur without your approval. This is not medical advice; see a doctor when needed, and verify venue names and hours before you go.",
     kbTitle: "📚 Trusted Medical & Scientific Knowledge Base",
     kbSub: "The AI agent strictly grounds its recommendations in these active references:",
     addBook: "+ Add Reference",
-    secClasses: "🏋️ 2. Fitness Classes & Nearby Venues",
+    secClasses: "🏋️ Fitness Classes & Nearby Venues",
     btnOnlyClasses: "🔄 Refresh Classes Only",
     classesSub: "Recommended classes, gyms, studios, and walking tracks near your selected area in Eastern Province or Riyadh:",
     emptyClasses: "Click generate to view suggested fitness classes and venues near your neighborhood.",
-    secNutrition: "🥗 3. Nutrition & Recovery Plan (Reference-Backed)",
+    secNutrition: "🥗 Nutrition & Recovery Plan (Reference-Backed)",
     btnOnlyNutrition: "🔄 Refresh Nutrition Only",
     emptyNutrition: "Independent meal, macro, and sleep recovery recommendations will appear here.",
-    dailyTitle: "🗓️ 4. Hour-by-Hour Daily Schedule Organizer",
+    dailyTitle: "🗓️ Hour-by-Hour Daily Schedule Organizer",
     regenDay: "🔄 Re-organize Day",
     emptyDay: "Your hour-by-hour daily schedule around your local commute and work hours will appear here.",
-    s3: "5. Approved Weekly Schedule",
+    s3: "Approved Weekly Schedule",
     approveAll: "Approve All",
     emptyWeek: 'No classes or meals approved yet. Click "Approve" to add them here.',
-    s4: "6. Ask Takamul AI Coach",
+    s4: "Ask Takamul AI Coach",
     approve: "Approve",
     skip: "Skip",
     remove: "Remove",
@@ -1238,6 +1239,7 @@ function applyLanguage() {
   $("t-s4").textContent = t.s4;
   $("chat-input").placeholder = t.chatPlaceholder;
   $("btn-send").textContent = t.send;
+  applyExtra();
   populateDistricts();
   renderBooks();
   renderClasses();
@@ -1302,56 +1304,31 @@ function getActiveKnowledgeContext() {
 }
 
 function cleanJsonString(str) {
-  return str.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
+  const a = str.indexOf("{"), b = str.lastIndexOf("}");
+  return a >= 0 && b > a ? str.slice(a, b + 1) : str.trim();
 }
 
-async function callGemini(promptText, isJson = false) {
-  const key = getApiKey().trim();
-  const body = {
-    contents: [{ role: "user", parts: [{ text: promptText }] }],
-    generationConfig: { temperature: 0.7 }
-  };
-  if (isJson) {
-    body.generationConfig.responseMimeType = "application/json";
-  }
-
+async function callAI(promptText, isJson = false) {
+  const body = { contents: [{ role: "user", parts: [{ text: promptText }] }], generationConfig: { temperature: 0.7 } };
+  if (isJson) body.generationConfig.responseMimeType = "application/json";
   let lastErr = "";
   for (const model of MODELS) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`;
     try {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(API_KEY)}`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body)
       });
       const data = await res.json();
       if (res.ok) {
-        setAiStatus(true, `AI Active (${model})`);
-        const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-        return isJson ? cleanJsonString(rawText) : rawText;
+        setAiStatus(true);
+        const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        return isJson ? cleanJsonString(raw) : raw;
       }
-      lastErr = data.error?.message || `HTTP ${res.status}`;
-    } catch (e) {
-      lastErr = e.message;
-    }
+      lastErr = data.error?.message || "HTTP " + res.status;
+    } catch (e) { lastErr = e.message; }
   }
-  setAiStatus(false, lang === "ar" ? "فشل الاتصال بالمفتاح" : "API Key Error");
-  throw new Error(lastErr || "Failed to connect to Gemini API");
+  setAiStatus(false, lang === "ar" ? "فشل الاتصال بالمفتاح" : "API key error");
+  throw new Error(lastErr || "Failed to connect to the AI service");
 }
-
-$("btn-test-ai").onclick = async () => {
-  const btn = $("btn-test-ai");
-  btn.disabled = true;
-  setAiStatus(true, lang === "ar" ? "جاري الفحص..." : "Testing...");
-  try {
-    await callGemini("Reply with OK only.", false);
-    alert(lang === "ar" ? "✅ اتصال Gemini AI شغال 100% وجاهز للعرض!" : "✅ Gemini AI connection verified and 100% operational!");
-  } catch (err) {
-    alert((lang === "ar" ? "❌ تعذر الاتصال بـ Gemini API: " : "❌ Gemini API Error: ") + err.message + "\n\n" + (lang === "ar" ? "اضغط على زر ⚙️ API Key لتحديث المفتاح." : "Click ⚙️ API Key to update your key."));
-  } finally {
-    btn.disabled = false;
-  }
-};
 
 async function generateClassesOnly() {
   const snap = getSnapshot();
@@ -1387,7 +1364,7 @@ Return ONLY valid JSON:
 }`;
 
   try {
-    const raw = await callGemini(prompt, true);
+    const raw = await callAI(prompt, true);
     const parsed = JSON.parse(raw);
     pendingClasses = Array.isArray(parsed.classes) ? parsed.classes : [];
     renderClasses();
@@ -1449,7 +1426,7 @@ Return ONLY valid JSON:
 }`;
 
   try {
-    const raw = await callGemini(prompt, true);
+    const raw = await callAI(prompt, true);
     const parsed = JSON.parse(raw);
     if (parsed.macros) {
       $("macro-bar").hidden = false;
@@ -1493,7 +1470,7 @@ Respond strictly in ${targetLang}. Return ONLY valid JSON:
 Include 7 to 8 realistic time blocks covering wake-up, breakfast, work + movement breaks, local commute buffer, evening fitness class in ${snap.district}, post-workout dinner, wind-down, and sleep.`;
 
   try {
-    const raw = await callGemini(prompt, true);
+    const raw = await callAI(prompt, true);
     const parsed = JSON.parse(raw);
     if (parsed.summary) {
       $("plan-summary").innerHTML = `<div class="summary-box">${parsed.summary}</div>`;
@@ -1563,7 +1540,7 @@ Answer the user's question in ${targetLang} in under 120 words. If they ask abou
 User question: ${text}`;
 
   try {
-    const reply = await callGemini(prompt, false);
+    const reply = await callAI(prompt, false);
     bubble.textContent = reply;
     chatHistory.push({ role: "ai", text: reply });
   } catch (err) {
@@ -1580,20 +1557,6 @@ $("chat-input").addEventListener("keydown", (e) => {
 document.querySelectorAll(".chip").forEach(chip => {
   chip.onclick = () => sendChat(chip.dataset.q);
 });
-
-$("btn-key").onclick = () => {
-  $("api-key-input").value = getApiKey();
-  $("key-modal").classList.add("open");
-};
-$("close-key").onclick = () => $("key-modal").classList.remove("open");
-$("save-key").onclick = () => {
-  const val = $("api-key-input").value.trim();
-  if (val) {
-    localStorage.setItem("takamul_gemini_key", val);
-    setAiStatus(true, lang === "ar" ? "تم تحديث المفتاح" : "Key Saved");
-  }
-  $("key-modal").classList.remove("open");
-};
 
 $("btn-add-book").onclick = () => $("book-modal").classList.add("open");
 $("close-book").onclick = () => $("book-modal").classList.remove("open");
@@ -1618,6 +1581,56 @@ $("save-book").onclick = () => {
   renderBooks();
 };
 
+
+const PAGES = ["profile", "plan", "week", "coach", "refs"];
+function showPage(p, push) {
+  if (!PAGES.includes(p)) p = "profile";
+  document.querySelectorAll("[data-page]").forEach(el => el.classList.toggle("page-hidden", el.dataset.page !== p));
+  document.querySelectorAll(".tab").forEach(b => { const on = b.dataset.go === p; b.classList.toggle("active", on); b.setAttribute("aria-current", on ? "page" : "false"); });
+  if (push !== false) history.replaceState(null, "", "#" + p);
+  window.scrollTo({ top: 0 });
+}
+document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => showPage(b.dataset.go)));
+$("btn-generate").addEventListener("click", () => showPage("plan"));
+window.addEventListener("hashchange", () => showPage(location.hash.slice(1), false));
+new MutationObserver(() => { $("tab-week-n").textContent = $("approved-count").textContent; }).observe($("approved-count"), { childList: true, characterData: true, subtree: true });
+
+const EN = {
+  text: {
+    "#tab-profile-t": "Profile", "#tab-plan-t": "My plan", "#tab-week-t": "My week", "#tab-coach-t": "Coach", "#tab-refs-t": "References",
+    "#go-profile": "Edit my details", "#t-s4 + .badge-blue": "Reference-guided",
+    "#tier-free-n": "Free", "#tier-free-p": "0 SAR / month", "#tier-free-d": "Basic daily routine tracking with manual entry of your health numbers.",
+    "#tier-plus-n": "Plus", "#tier-plus-p": "39 SAR / month", "#tier-plus-d": "AI coaching for classes and nutrition, with your approval for every change.",
+    "#tier-pro-n": "Pro", "#tier-pro-p": "119 SAR / month", "#tier-pro-d": "Everything in Plus, plus proposed access to partner gym classes (Fitness Time / 1Pass) and meals (Calo).",
+    "#book-modal h2": "Add a trusted reference", "label[for=book-title]": "Book or guideline title", "label[for=book-author]": "Author / organization",
+    "label[for=book-rule]": "Key rules the AI should follow from it", "#save-book": "Add to knowledge base", "#close-book": "Cancel"
+  },
+  ph: {
+    "#neighborhood": "e.g. Al Doha in Dhahran, Khobar Corniche, or Al Malqa in Riyadh",
+    "#notes": "e.g. I like evening cycling or strength classes and high-protein meals",
+    "#book-author": "e.g. Saudi Food & Drug Authority", "#book-rule": "Write the key rules the AI must follow from this reference..."
+  },
+  opts: {
+    "#goal option": ["Build muscle & strength", "Fat loss & fitness", "High fitness & endurance (CrossFit / Cycling)", "Better sleep & stress recovery"],
+    "#city-select option": ["Eastern Province", "Riyadh"]
+  },
+  chips: [
+    ["Gyms near me?", "What are the best gyms or group classes near my location?"],
+    ["Sleep tips from a reference?", "What does the sleep reference (Why We Sleep) say about improving my sleep?"],
+    ["Harvard plate meals?", "Plan my daily meals using the Harvard healthy eating plate guidance"]
+  ]
+};
+function applyExtra() {
+  const en = lang === "en";
+  const keep = (el, k, v) => { if (!(k in el.dataset)) el.dataset[k] = v; };
+  Object.entries(EN.text).forEach(([sel, txt]) => { const el = document.querySelector(sel); if (!el) return; keep(el, "ar", el.textContent); el.textContent = en ? txt : el.dataset.ar; });
+  Object.entries(EN.ph).forEach(([sel, txt]) => { const el = document.querySelector(sel); if (!el) return; keep(el, "arPh", el.placeholder); el.placeholder = en ? txt : el.dataset.arPh; });
+  Object.entries(EN.opts).forEach(([sel, arr]) => document.querySelectorAll(sel).forEach((o, i) => { if (i >= arr.length) return; keep(o, "ar", o.textContent); o.textContent = en ? arr[i] : o.dataset.ar; }));
+  document.querySelectorAll(".chip").forEach((c, i) => { if (!EN.chips[i]) return; keep(c, "ar", c.textContent); keep(c, "arQ", c.dataset.q); c.textContent = en ? EN.chips[i][0] : c.dataset.ar; c.dataset.q = en ? EN.chips[i][1] : c.dataset.arQ; });
+  document.title = en ? "Takamul Wellness | Your week, in one place" : "تكامل للصحة واللياقة | Takamul Wellness";
+  if (!$("ai-status-pill").classList.contains("err-state")) $("ai-status-text").textContent = en ? "AI ready" : "الذكاء الاصطناعي جاهز";
+}
+showPage(location.hash.slice(1), false);
 applyLanguage();
 appendMsg("ai", i18n[lang].welcomeChat);
 </script>
