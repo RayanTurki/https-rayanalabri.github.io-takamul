@@ -622,6 +622,7 @@ html[dir="ltr"] .summary-box {
     </div>
   </div>
 
+  <p class="note" id="free-note" data-page="profile" hidden></p>
   <div class="grid">
     <!-- Left Column: Biometrics, Location in Eastern Province & Riyadh + Trusted Knowledge Base -->
     <div class="stack">
@@ -1309,6 +1310,7 @@ function cleanJsonString(str) {
 }
 
 async function callAI(promptText, isJson = false) {
+  if (isFree()) throw new Error(LOCK[lang]);
   const body = { contents: [{ role: "user", parts: [{ text: promptText }] }], generationConfig: { temperature: 0.7 } };
   if (isJson) body.generationConfig.responseMimeType = "application/json";
   let lastErr = "";
@@ -1331,6 +1333,7 @@ async function callAI(promptText, isJson = false) {
 }
 
 async function generateClassesOnly() {
+  if (isFree()) { showLock(); return; }
   const snap = getSnapshot();
   const targetLang = lang === "ar" ? "Arabic" : "English";
   const btn = $("btn-only-classes");
@@ -1377,6 +1380,7 @@ Return ONLY valid JSON:
 }
 
 async function generateNutritionOnly() {
+  if (isFree()) { showLock(); return; }
   const snap = getSnapshot();
   const targetLang = lang === "ar" ? "Arabic" : "English";
   const kbContext = getActiveKnowledgeContext();
@@ -1453,6 +1457,7 @@ Return ONLY valid JSON:
 }
 
 async function generateDailyScheduleOnly() {
+  if (isFree()) { showLock(); return; }
   const snap = getSnapshot();
   const targetLang = lang === "ar" ? "Arabic" : "English";
   const btn = $("btn-regen-day");
@@ -1486,6 +1491,7 @@ Include 7 to 8 realistic time blocks covering wake-up, breakfast, work + movemen
 }
 
 $("btn-generate").onclick = async () => {
+  if (isFree()) { showFreeSummary(); return; }
   const t = i18n[lang];
   $("plan-error").hidden = true;
   $("btn-generate").disabled = true;
@@ -1515,6 +1521,7 @@ function appendMsg(role, text) {
 }
 
 async function sendChat(customText) {
+  if (isFree()) { appendMsg("ai", LOCK[lang]); return; }
   const input = $("chat-input");
   const text = (customText || input.value).trim();
   if (!text) return;
@@ -1627,9 +1634,51 @@ function applyExtra() {
   Object.entries(EN.ph).forEach(([sel, txt]) => { const el = document.querySelector(sel); if (!el) return; keep(el, "arPh", el.placeholder); el.placeholder = en ? txt : el.dataset.arPh; });
   Object.entries(EN.opts).forEach(([sel, arr]) => document.querySelectorAll(sel).forEach((o, i) => { if (i >= arr.length) return; keep(o, "ar", o.textContent); o.textContent = en ? arr[i] : o.dataset.ar; }));
   document.querySelectorAll(".chip").forEach((c, i) => { if (!EN.chips[i]) return; keep(c, "ar", c.textContent); keep(c, "arQ", c.dataset.q); c.textContent = en ? EN.chips[i][0] : c.dataset.ar; c.dataset.q = en ? EN.chips[i][1] : c.dataset.arQ; });
+  refreshTierUI();
   document.title = en ? "Takamul Wellness | Your week, in one place" : "تكامل للصحة واللياقة | Takamul Wellness";
   if (!$("ai-status-pill").classList.contains("err-state")) $("ai-status-text").textContent = en ? "AI ready" : "الذكاء الاصطناعي جاهز";
 }
+
+const LOCK = {
+  ar: "الباقة الأساسية (Free) تشمل تتبع الروتين وإدخال المؤشرات يدوياً فقط. الحصص والتغذية والجدول اليومي والمدرب الذكي متاحة في باقة Plus أو Pro، وتقدر تختارها من صفحة بياناتي.",
+  en: "The Free plan covers basic tracking and manual entry only. AI classes, nutrition, daily schedule and the coach are available in Plus or Pro, which you can pick on the Profile page."
+};
+function isFree() { return selectedTier === "Free"; }
+function showLock() {
+  const e = $("plan-error"); e.hidden = false; e.textContent = "";
+  e.appendChild(document.createTextNode(LOCK[lang] + " "));
+  const b = document.createElement("button"); b.className = "sagebtn mini"; b.type = "button";
+  b.textContent = lang === "ar" ? "الترقية إلى Plus" : "Upgrade to Plus";
+  b.onclick = () => { document.querySelector('.tier-card[data-tier="Plus"]').click(); showPage("profile"); };
+  e.appendChild(b);
+}
+function showFreeSummary() {
+  const ar = lang === "ar", g = id => ($(id).value || "").trim();
+  const rows = [
+    [ar ? "النوم" : "Sleep", g("sleep") ? g("sleep") + (ar ? " ساعة" : " h") : "—", ar ? "مرجع عام للبالغين: 7 ساعات فأكثر" : "General adult guidance: 7 hours or more"],
+    [ar ? "الخطوات اليومية" : "Daily steps", g("steps") || "—", ar ? "أي زيادة في الحركة اليومية مفيدة" : "Any increase in daily movement helps"],
+    [ar ? "التمارين بالأسبوع" : "Workouts per week", g("work") || "—", ar ? "توصي منظمة الصحة العالمية بنحو 150 دقيقة نشاط معتدل أسبوعياً" : "WHO suggests about 150 minutes of moderate activity per week"],
+    [ar ? "نبض الراحة" : "Resting heart rate", g("hr") ? g("hr") + " bpm" : "—", ar ? "المعدل المعتاد للبالغين 60–100 نبضة بالدقيقة" : "Typical adult range is 60–100 bpm"]
+  ];
+  const box = document.createElement("div"); box.className = "summary-box";
+  const h = document.createElement("strong"); h.textContent = ar ? "ملخص بياناتك (الباقة الأساسية)" : "Your basic summary (Free plan)"; box.appendChild(h);
+  rows.forEach(r => {
+    const d = document.createElement("div"); d.style.marginTop = "8px";
+    const b = document.createElement("b"); b.textContent = r[0] + ": " + r[1];
+    const sm = document.createElement("div"); sm.className = "note"; sm.style.margin = "0"; sm.textContent = r[2];
+    d.appendChild(b); d.appendChild(sm); box.appendChild(d);
+  });
+  const n = document.createElement("div"); n.className = "note"; n.textContent = ar ? "معلومات عامة وليست نصيحة طبية." : "General information, not medical advice."; box.appendChild(n);
+  const p = $("plan-summary"); p.textContent = ""; p.appendChild(box);
+  showLock();
+}
+function refreshTierUI() {
+  const free = isFree(), fn = $("free-note");
+  fn.hidden = !free;
+  fn.textContent = lang === "ar" ? "الباقة الأساسية: تتبع الروتين وإدخال المؤشرات يدوياً مع ملخص بسيط لبياناتك. الحصص والتغذية والجدول والمدرب الذكي تحتاج باقة Plus أو Pro." : "Free plan: basic routine tracking and manual entry with a simple summary of your numbers. AI classes, nutrition, daily schedule and coach need Plus or Pro.";
+  $("btn-generate").textContent = free ? (lang === "ar" ? "عرض ملخص بياناتي" : "Show my basic summary") : i18n[lang].btnGen;
+}
+document.querySelectorAll(".tier-card").forEach(c => c.addEventListener("click", refreshTierUI));
 showPage(location.hash.slice(1), false);
 applyLanguage();
 appendMsg("ai", i18n[lang].welcomeChat);
