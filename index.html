@@ -583,6 +583,7 @@ html[dir="ltr"] .summary-box {
     </div>
     <div class="top-controls">
       <span class="ai-status" id="ai-status-pill"><span class="ai-dot"></span><span id="ai-status-text">الذكاء الاصطناعي جاهز</span></span>
+      <button class="ghost mini" id="btn-key" type="button" aria-label="Gemini API key" title="Gemini API key">🔑</button>
       <button class="sagebtn mini" id="btn-lang" type="button">English</button>
     </div>
   </div>
@@ -811,8 +812,15 @@ html[dir="ltr"] .summary-box {
 </div>
 
 <script>
-// Experimental build: the key is stored in the page. Replace it here if you ever change keys.
-const API_KEY = "AQ.Ab8RN6Ihnz5ZU42OdpxdYTANEghUqRsgvkBCqMigLmvIPABKIQ";
+// No key is stored in this file. Each device pastes its own Gemini key once (saved in this browser only).
+let API_KEY = "";
+try { API_KEY = localStorage.getItem("takamul_key") || ""; } catch (e) {}
+function askKey() {
+  const k = prompt(lang === "ar" ? "الصق مفتاح Gemini API (يُحفظ على هذا الجهاز فقط):" : "Paste your Gemini API key (saved on this device only):");
+  if (!k || !k.trim()) return false;
+  API_KEY = k.trim(); try { localStorage.setItem("takamul_key", API_KEY); } catch (e) {}
+  return true;
+}
 const MODELS = ["gemini-3.8-flash", "gemini-3-flash-preview", "gemini-2.5-flash", "gemini-2.0-flash"];
 
 let lang = "ar";
@@ -1311,6 +1319,7 @@ function cleanJsonString(str) {
 
 async function callAI(promptText, isJson = false) {
   if (isFree()) throw new Error(LOCK[lang]);
+  if (!API_KEY && !askKey()) throw new Error(lang === "ar" ? "أدخل مفتاح Gemini أولاً (زر 🔑 أعلى الصفحة)." : "Enter a Gemini API key first (🔑 button at the top).");
   const body = { contents: [{ role: "user", parts: [{ text: promptText }] }], generationConfig: { temperature: 0.7 } };
   if (isJson) body.generationConfig.responseMimeType = "application/json";
   let lastErr = "";
@@ -1328,6 +1337,7 @@ async function callAI(promptText, isJson = false) {
       lastErr = data.error?.message || "HTTP " + res.status;
     } catch (e) { lastErr = e.message; }
   }
+  if (/API key/i.test(lastErr)) { API_KEY = ""; try { localStorage.removeItem("takamul_key"); } catch (e) {} }
   setAiStatus(false, lang === "ar" ? "فشل الاتصال بالمفتاح" : "API key error");
   throw new Error(lastErr || "Failed to connect to the AI service");
 }
@@ -1679,6 +1689,7 @@ function refreshTierUI() {
   $("btn-generate").textContent = free ? (lang === "ar" ? "عرض ملخص بياناتي" : "Show my basic summary") : i18n[lang].btnGen;
 }
 document.querySelectorAll(".tier-card").forEach(c => c.addEventListener("click", refreshTierUI));
+$("btn-key").addEventListener("click", () => { askKey(); });
 showPage(location.hash.slice(1), false);
 applyLanguage();
 appendMsg("ai", i18n[lang].welcomeChat);
